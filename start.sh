@@ -85,7 +85,7 @@ echo "Frontend: http://localhost:3000"
 echo "Backend: http://localhost:5001"
 echo "Press Ctrl+C to stop both servers"
 
-# Function to handle cleanup
+# Function to cleanup on exit
 cleanup() {
     echo "Stopping servers..."
     kill $BACKEND_PID
@@ -93,7 +93,7 @@ cleanup() {
     exit
 }
 
-# Set up trap to catch Ctrl+C and other termination signals
+# Trap SIGINT and SIGTERM signals and call cleanup
 trap cleanup SIGINT SIGTERM
 
 # Wait for both processes

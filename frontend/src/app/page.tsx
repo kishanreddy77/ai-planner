@@ -128,6 +128,31 @@ export default function Home() {
     });
   };
 
+  const formatTimeRange = (time: string, duration: number) => {
+    if (!time) return '';
+    const [hours, minutes] = time.split(':').map(Number);
+    if (isNaN(hours) || isNaN(minutes)) return '';
+    
+    // Start time
+    const startHours = hours % 12 || 12;
+    const startPeriod = hours >= 12 ? 'PM' : 'AM';
+    const startTime = `${startHours}:${minutes.toString().padStart(2, '0')}`;
+    
+    // Calculate end time
+    const endTimeDate = new Date();
+    endTimeDate.setHours(hours);
+    endTimeDate.setMinutes(minutes + duration);
+    
+    const endHours = endTimeDate.getHours();
+    const endHours12 = endHours % 12 || 12;
+    const endPeriod = endHours >= 12 ? 'PM' : 'AM';
+    const endMinutes = endTimeDate.getMinutes();
+    
+    const endTime = `${endHours12}:${endMinutes.toString().padStart(2, '0')}`;
+    
+    return `${startTime} ${startPeriod} - ${endTime} ${endPeriod}`;
+  };
+
   return (
     <main className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-blue-900 p-8">
       <div className="max-w-6xl mx-auto">
@@ -254,43 +279,51 @@ export default function Home() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mt-8 bg-gray-800 rounded-lg shadow-lg p-8"
+            className="mt-8 bg-gray-800/80 backdrop-blur-sm rounded-xl shadow-2xl p-8"
           >
             <h2 className="text-3xl font-bold text-gray-200 mb-6">Your Personalized Plan</h2>
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-700">
-                <thead className="bg-gray-700">
+                <thead className="bg-gray-700/50">
                   <tr>
-                    <th className="px-8 py-4 text-left text-sm font-medium text-gray-300 uppercase tracking-wider">Time</th>
-                    <th className="px-8 py-4 text-left text-sm font-medium text-gray-300 uppercase tracking-wider">Activity</th>
-                    <th className="px-8 py-4 text-left text-sm font-medium text-gray-300 uppercase tracking-wider">Description</th>
-                    <th className="px-8 py-4 text-left text-sm font-medium text-gray-300 uppercase tracking-wider">Duration</th>
-                    <th className="px-8 py-4 text-left text-sm font-medium text-gray-300 uppercase tracking-wider">Priority</th>
-                    <th className="px-8 py-4 text-left text-sm font-medium text-gray-300 uppercase tracking-wider">Status</th>
+                    <th className="px-6 py-4 text-left text-sm font-medium text-gray-300 uppercase tracking-wider">Time</th>
+                    <th className="px-6 py-4 text-left text-sm font-medium text-gray-300 uppercase tracking-wider">Activity</th>
+                    <th className="px-6 py-4 text-left text-sm font-medium text-gray-300 uppercase tracking-wider">Description</th>
+                    <th className="px-6 py-4 text-left text-sm font-medium text-gray-300 uppercase tracking-wider">Duration</th>
+                    <th className="px-6 py-4 text-left text-sm font-medium text-gray-300 uppercase tracking-wider">Priority</th>
+                    <th className="px-6 py-4 text-left text-sm font-medium text-gray-300 uppercase tracking-wider">Status</th>
                   </tr>
                 </thead>
-                <tbody className="bg-gray-800 divide-y divide-gray-700">
-                  {plan.map((item, index) => (
-                    <tr key={index} className={item.completed ? 'bg-gray-700' : ''}>
-                      <td className="px-8 py-6 whitespace-nowrap text-lg text-gray-200">{item.time}</td>
-                      <td className="px-8 py-6 whitespace-nowrap text-lg font-medium text-gray-200">{item.activity}</td>
-                      <td className="px-8 py-6 text-lg text-gray-300">{item.description}</td>
-                      <td className="px-8 py-6 whitespace-nowrap text-lg text-gray-300">{item.duration} min</td>
-                      <td className="px-8 py-6 whitespace-nowrap text-lg text-gray-300">
-                        <span className={`px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full ${
-                          item.priority === 1 ? 'bg-red-900 text-red-200' :
-                          item.priority === 2 ? 'bg-yellow-900 text-yellow-200' :
-                          'bg-green-900 text-green-200'
+                <tbody className="bg-gray-800/50 divide-y divide-gray-700">
+                  {plan.map((activity, index) => (
+                    <tr key={index} className={activity.completed ? 'bg-gray-700/30' : ''}>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                        {formatTimeRange(activity.time, activity.duration)}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-200">
+                        {activity.activity}
+                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-300">
+                        {activity.description}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                        {activity.duration} min
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                          activity.priority === 1 ? 'bg-red-900/70 text-red-200' :
+                          activity.priority === 2 ? 'bg-yellow-900/70 text-yellow-200' :
+                          'bg-green-900/70 text-green-200'
                         }`}>
-                          {item.priority === 1 ? 'High' : item.priority === 2 ? 'Medium' : 'Low'}
+                          {activity.priority === 1 ? 'High' : activity.priority === 2 ? 'Medium' : 'Low'}
                         </span>
                       </td>
-                      <td className="px-8 py-6 whitespace-nowrap text-lg text-gray-300">
+                      <td className="px-6 py-4 whitespace-nowrap">
                         <input
                           type="checkbox"
-                          checked={item.completed || false}
+                          className="h-4 w-4 rounded border-gray-600 bg-gray-700 text-blue-500 focus:ring-blue-500 focus:ring-offset-gray-800"
+                          checked={activity.completed}
                           onChange={() => handleTaskComplete(index)}
-                          className="h-5 w-5 text-blue-500 focus:ring-blue-500 border-gray-600 rounded bg-gray-700"
                         />
                       </td>
                     </tr>
